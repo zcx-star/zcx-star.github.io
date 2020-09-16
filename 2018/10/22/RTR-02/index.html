@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    
+
+    
+    <title>RTR - 02. The Graphics Rendering Pipeline | zhchx</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+        <meta name="keywords" content="Real Time Rendering" />
+    
+    <meta name="description" content="The Graphics Rendering Pipeline 1. Application software CPU collision detection &#x2F; global acceleration &#x2F; animation &#x2F; physical simulation &#x2F; … not divide into substages -&gt; executed in paraller -&gt; s">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RTR - 02. The Graphics Rendering Pipeline">
+<meta property="og:url" content="http://yoursite.com/2018/10/22/RTR-02/index.html">
+<meta property="og:site_name" content="zhchx">
+<meta property="og:description" content="The Graphics Rendering Pipeline 1. Application software CPU collision detection &#x2F; global acceleration &#x2F; animation &#x2F; physical simulation &#x2F; … not divide into substages -&gt; executed in paraller -&gt; s">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://yoursite.com/images/RTR4.02.02.png">
+<meta property="article:published_time" content="2018-10-22T12:16:27.000Z">
+<meta property="article:modified_time" content="2020-05-14T07:10:56.000Z">
+<meta property="article:author" content="Chenxing Zheng">
+<meta property="article:tag" content="Real Time Rendering">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/images/RTR4.02.02.png">
+    
+
+    
+
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/titillium-web/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+<script src="/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+    <div id="wrap">
+        <header id="header">
+    <div id="header-outer" class="outer">
+        <div class="container">
+            <div class="container-inner">
+                <div id="header-title">
+                    <h1 class="logo-wrap">
+                        <a href="/" class="logo"></a>
+                    </h1>
+                    
+                        <h2 class="subtitle-wrap">
+                            <p class="subtitle">Tech &amp; Art</p>
+                        </h2>
+                    
+                </div>
+                <div id="header-inner" class="nav-container">
+                    <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+                    <div class="nav-container-inner">
+                        <ul id="main-nav">
+                            
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/">Home</a>
+                                </li>
+                            
+                                        <ul class="main-nav-list"><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/Directx11/">Directx11</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/Real-Time-Rendering/">Real Time Rendering</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/Shader/">Shader</a></li></ul>
+                                    
+                        </ul>
+                        <nav id="sub-nav">
+                            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+</div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+        <div class="container">
+            <div class="main-body container-inner">
+                <div class="main-body-inner">
+                    <section id="main">
+                        <div class="main-body-header">
+    <h1 class="header">
+    
+    <a class="page-title-link" href="/categories/Real-Time-Rendering/">Real Time Rendering</a>
+    </h1>
+</div>
+
+                        <div class="main-body-content">
+                            <article id="post-RTR-02" class="article article-single article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+        RTR - 02. The Graphics Rendering Pipeline
+        </h1>
+    
+
+            </header>
+        
+        
+            <div class="article-meta">
+                
+    <div class="article-date">
+        <a href="/2018/10/22/RTR-02/" class="article-date">
+            <time datetime="2018-10-22T12:16:27.000Z" itemprop="datePublished">2018-10-22</time>
+        </a>
+    </div>
+
+		
+
+                
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/Real-Time-Rendering/" rel="tag">Real Time Rendering</a>
+    </div>
+
+            </div>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+            <h2 id="The-Graphics-Rendering-Pipeline"><a href="#The-Graphics-Rendering-Pipeline" class="headerlink" title="The Graphics Rendering Pipeline"></a>The Graphics Rendering Pipeline</h2><p><img src="/images/RTR4.02.02.png" alt=""></p>
+<h3 id="1-Application"><a href="#1-Application" class="headerlink" title="1. Application"></a>1. Application</h3><ul>
+<li>software</li>
+<li>CPU</li>
+<li>collision detection / global acceleration / animation / physical simulation / …</li>
+<li>not divide into substages -&gt; executed in paraller -&gt; superscalar construction</li>
+</ul>
+<p>=&gt;<strong>geometry / rendering primitives</strong></p>
+<hr>
+<h3 id="2-Geometry-Peocessing"><a href="#2-Geometry-Peocessing" class="headerlink" title="2. Geometry Peocessing"></a>2. Geometry Peocessing</h3><ul>
+<li>what / how / where</li>
+<li>GPU<br><img src="/images/RTR4.02.03.png" alt=""></li>
+</ul>
+<h4 id="2-1-Vertex-Shading"><a href="#2-1-Vertex-Shading" class="headerlink" title="2.1 Vertex Shading"></a>2.1 Vertex Shading</h4><ul>
+<li>compute the position for a vertex<ul>
+<li><strong>model -&gt; world -&gt; view / eye / camera</strong></li>
+</ul>
+</li>
+<li>evaluate vertex output data<ul>
+<li>Vertex shading: compute a shading equation</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-2-Projection"><a href="#2-2-Projection" class="headerlink" title="2.2 Projection"></a>2.2 Projection</h4><ul>
+<li>orthographic / parallel</li>
+<li>perspective</li>
+<li>view volume to unit cube -&gt; <strong>project</strong></li>
+<li>z coordinate -&gt; stored in z-buffer, the models are projected from 3 to 2 dimensions</li>
+</ul>
+<h4 id="2-3-Clipping"><a href="#2-3-Clipping" class="headerlink" title="2.3 Clipping"></a>2.3 Clipping</h4><ul>
+<li>clip with unit cube -&gt; <strong>clip</strong></li>
+</ul>
+<h4 id="2-4-Screen-Mapping"><a href="#2-4-Screen-Mapping" class="headerlink" title="2.4 Screen Mapping"></a>2.4 Screen Mapping</h4><ul>
+<li>1x1 -&gt; 1920x1080 -&gt; <strong>screen/window</strong></li>
+</ul>
+<p>=&gt;<strong>transformed and projected vertices with their shading data</strong></p>
+<hr>
+<h3 id="3-Rasterization"><a href="#3-Rasterization" class="headerlink" title="3. Rasterization"></a>3. Rasterization</h3><p><img src="/images/RTR4.02.08.png" alt=""></p>
+<ul>
+<li>triangle setup / primitive assembly</li>
+<li>triangle traversal<ul>
+<li>find which samples or pixels are inside a triangle</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>fixed function</li>
+<li>hardware</li>
+<li>triangles are formed from three vertices</li>
+</ul>
+<p>=&gt;<strong>fragment</strong></p>
+<hr>
+<h3 id="4-Pixel-Peocessing"><a href="#4-Pixel-Peocessing" class="headerlink" title="4. Pixel Peocessing"></a>4. Pixel Peocessing</h3><ul>
+<li>pixel shading<ul>
+<li>programmable GPU core</li>
+<li>texturing</li>
+</ul>
+</li>
+<li>merging<ul>
+<li>highly configurable</li>
+<li>combine the fragment color with color buffer</li>
+<li>visibility</li>
+<li>alpha channel / stencil buffer / frame buffer /…</li>
+</ul>
+</li>
+</ul>
+<hr>
+<ul>
+<li>double buffering</li>
+<li>different coordinates<br><img src="/images/RTR4_02_01.png" alt=""></li>
+</ul>
+
+        </div>
+        <footer class="article-footer">
+            
+
+
+
+    <a data-url="http://yoursite.com/2018/10/22/RTR-02/" data-id="ckf5fm8rq0007gouxc90y2xgy" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+        </footer>
+    </div>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "author": {
+            "@type": "Person",
+            "name": "Chenxing Zheng"
+        },
+        "headline": "RTR - 02. The Graphics Rendering Pipeline",
+        "image": "http://yoursite.com/images/RTR4.02.02.png",
+        "keywords": "Real Time Rendering",
+        "genre": "Real Time Rendering",
+        "datePublished": "2018-10-22",
+        "dateCreated": "2018-10-22",
+        "dateModified": "2020-05-14",
+        "url": "http://yoursite.com/2018/10/22/RTR-02/",
+        "description": "The Graphics Rendering Pipeline
+1. Application
+software
+CPU
+collision detection / global acceleration / animation / physical simulation / …
+not divide into substages -&gt; executed in paraller -&gt; s"
+        "wordCount": 201
+    }
+</script>
+
+</article>
+
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+    </div>
+
+    
+    </section>
+
+
+                        </div>
+                    </section>
+                    <aside id="sidebar">
+    <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+    <div class="sidebar-top">
+        <p>follow:</p>
+        <ul class="social-links">
+            
+                
+                <li>
+                    <a class="social-tooltip" title="github" href="https://github.com/zcx-star" target="_blank" rel="noopener">
+                        <i class="icon fa fa-github"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="bullseye" href="https://www.shadertoy.com/user/zcx_star" target="_blank" rel="noopener">
+                        <i class="icon fa fa-bullseye"></i>
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2018/11/12/RTR-03/" id="article-nav-newer" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">newer</strong>
+        <p class="article-nav-title">
+        
+            RTR - 03. The Graphics Processing Unit
+        
+        </p>
+        <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+    
+    
+        <a href="/2018/09/03/Directx11-02/" id="article-nav-older" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">older</strong>
+        <p class="article-nav-title">Directx11 - 02.流程梳理</p>
+        <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+        </a>
+    
+</nav>
+
+    
+    <div class="widgets-container">
+        
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">tags</h3>
+        <div class="widget">
+            <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Directx11/" rel="tag">Directx11</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Real-Time-Rendering/" rel="tag">Real Time Rendering</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Shader/" rel="tag">Shader</a><span class="tag-list-count">6</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+    <div class="widget-wrap widget-float">
+        <h3 class="widget-title">tag cloud</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/Directx11/" style="font-size: 10px;">Directx11</a> <a href="/tags/Real-Time-Rendering/" style="font-size: 15px;">Real Time Rendering</a> <a href="/tags/Shader/" style="font-size: 20px;">Shader</a>
+        </div>
+    </div>
+
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">archives</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">February 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">links</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://hexo.io" target="_blank" rel="noopener">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+            
+        
+    </div>
+</aside>
+
+                </div>
+            </div>
+        </div>
+        <footer id="footer">
+    <div class="container">
+        <div class="container-inner">
+            <a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>
+            <div class="credit">
+                <h1 class="logo-wrap">
+                    <a href="/" class="logo"></a>
+                </h1>
+                <p>&copy; 2020 Chenxing Zheng</p>
+                <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a></p>
+            </div>
+            <div class="footer-plugins">
+              
+    
+
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+        
+    
+    <script>
+    var disqus_shortname = 'hexo-theme-hueman';
+    
+    
+    var disqus_url = 'http://yoursite.com/2018/10/22/RTR-02/';
+    
+    (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+    </script>
+
+
+
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });
+        </script>
+        
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML.js"></script>
+
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+    </div>
+</body>
+</html>

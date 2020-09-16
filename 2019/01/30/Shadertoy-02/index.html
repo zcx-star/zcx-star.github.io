@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    
+
+    
+    <title>Shadertoy - 02. Interior Mapping | zhchx</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+        <meta name="keywords" content="Shader" />
+    
+    <meta name="description" content="Shadertoy地址  Interior Mapping是一种伪造室内场景的实时渲染技术不需要建模，在一个平面上就可以渲染出房间的体积感 这里是该技术开发者的博客，里面有paper及demo需要了解光线追踪的基础知识，可以看我上一篇或者Scratchapixel 实际应用中有两种思路，一种是生成单个房间，然后在房间内划分区域另一种是将房间拆分成xyz三个方向的平面，本文实现的是这种  实现思路">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Shadertoy - 02. Interior Mapping">
+<meta property="og:url" content="http://yoursite.com/2019/01/30/Shadertoy-02/index.html">
+<meta property="og:site_name" content="zhchx">
+<meta property="og:description" content="Shadertoy地址  Interior Mapping是一种伪造室内场景的实时渲染技术不需要建模，在一个平面上就可以渲染出房间的体积感 这里是该技术开发者的博客，里面有paper及demo需要了解光线追踪的基础知识，可以看我上一篇或者Scratchapixel 实际应用中有两种思路，一种是生成单个房间，然后在房间内划分区域另一种是将房间拆分成xyz三个方向的平面，本文实现的是这种  实现思路">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://yoursite.com/images/Shadertoy_02_01.png">
+<meta property="article:published_time" content="2019-01-30T06:51:45.000Z">
+<meta property="article:modified_time" content="2020-09-16T13:29:42.210Z">
+<meta property="article:author" content="Chenxing Zheng">
+<meta property="article:tag" content="Shader">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/images/Shadertoy_02_01.png">
+    
+
+    
+
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/titillium-web/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+<script src="/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+    <div id="wrap">
+        <header id="header">
+    <div id="header-outer" class="outer">
+        <div class="container">
+            <div class="container-inner">
+                <div id="header-title">
+                    <h1 class="logo-wrap">
+                        <a href="/" class="logo"></a>
+                    </h1>
+                    
+                        <h2 class="subtitle-wrap">
+                            <p class="subtitle">Tech &amp; Art</p>
+                        </h2>
+                    
+                </div>
+                <div id="header-inner" class="nav-container">
+                    <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+                    <div class="nav-container-inner">
+                        <ul id="main-nav">
+                            
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/">Home</a>
+                                </li>
+                            
+                                        <ul class="main-nav-list"><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/Directx11/">Directx11</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/Real-Time-Rendering/">Real Time Rendering</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/Shader/">Shader</a></li></ul>
+                                    
+                        </ul>
+                        <nav id="sub-nav">
+                            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+</div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+        <div class="container">
+            <div class="main-body container-inner">
+                <div class="main-body-inner">
+                    <section id="main">
+                        <div class="main-body-header">
+    <h1 class="header">
+    
+    <a class="page-title-link" href="/categories/Shader/">Shader</a>
+    </h1>
+</div>
+
+                        <div class="main-body-content">
+                            <article id="post-Shadertoy-02" class="article article-single article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+        Shadertoy - 02. Interior Mapping
+        </h1>
+    
+
+            </header>
+        
+        
+            <div class="article-meta">
+                
+    <div class="article-date">
+        <a href="/2019/01/30/Shadertoy-02/" class="article-date">
+            <time datetime="2019-01-30T06:51:45.000Z" itemprop="datePublished">2019-01-30</time>
+        </a>
+    </div>
+
+		
+
+                
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/Shader/" rel="tag">Shader</a>
+    </div>
+
+            </div>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+            <p><img src="/images/Shadertoy_02_01.png" alt=""><br><a href="https://www.shadertoy.com/view/tsX3Dr" target="_blank" rel="noopener">Shadertoy地址</a></p>
+<hr>
+<p>Interior Mapping是一种伪造室内场景的实时渲染技术<br>不需要建模，在一个平面上就可以渲染出房间的体积感</p>
+<p>这里是该技术开发者的<a href="http://interiormapping.oogst3d.net/" target="_blank" rel="noopener">博客</a>，里面有paper及demo<br>需要了解光线追踪的基础知识，可以看我<a href="https://zcx-star.github.io/2019/01/28/Shadertoy-01/" target="_blank" rel="noopener">上一篇</a>或者<a href="http://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes" target="_blank" rel="noopener">Scratchapixel</a></p>
+<p>实际应用中有两种思路，一种是生成单个房间，然后在房间内划分区域<br>另一种是将房间拆分成xyz三个方向的平面，本文实现的是这种</p>
+<hr>
+<h4 id="实现思路"><a href="#实现思路" class="headerlink" title="实现思路"></a>实现思路</h4><ol>
+<li>设置参数搭建场景</li>
+<li>发射光线，检测是否和物体相交</li>
+<li>计算最终颜色</li>
+</ol>
+<h4 id="如何检测相交"><a href="#如何检测相交" class="headerlink" title="如何检测相交"></a>如何检测相交</h4><p>首先只考虑xz方向的平面，平面上任意一点可以表示为（0，h，0）<br>如何检测和平面相交在<a href="https://zcx-star.github.io/2019/01/28/Shadertoy-01/" target="_blank" rel="noopener">前一篇</a>里说过了，$ t = \frac{h - ro.y}{rd.y} $<br>假设两个平面之间间隔为$d$，那么平面的位置$h$可以表示为$n * d$（ $n$为任意整数）<br>但是因为平面是无限延伸的，如果直接做检测相交，光线碰到的永远只有最近的两个平面<br><img src="/images/Shadertoy_02_02.png" alt=""><br>所以我们需要判断每个像素应该对应的平面坐标$h$，而不是找到最近的相交平面</p>
+<p>当摄像机是仰视的时候，我们看到的是高于像素的天花板<br>当摄像机是俯视的时候，我们看到的是低于像素的地板<br><img src="/images/Shadertoy_02_03.png" alt=""><br>那么我们可以通过判断$rd$的方向来确认是需要向上取整还是向下取整得到$h$</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">vec2 intersect(in vec3 ro, in vec3 rd, in vec3 Axis, in float d, in float id1, in float id2)</span><br><span class="line">&#123;</span><br><span class="line">    float rd_weight &#x3D; dot( rd, Axis );</span><br><span class="line">    float ro_weight &#x3D; dot( ro ,Axis );</span><br><span class="line">    float pointer &#x3D; ceil( ro_weight &#x2F; d );</span><br><span class="line">    </span><br><span class="line">    if( rd_weight &gt; 0.0 ) &#x2F;&#x2F; look up</span><br><span class="line">    &#123;</span><br><span class="line">        float h &#x3D; pointer * d;</span><br><span class="line">        float t &#x3D; ( h - ro_weight ) &#x2F; rd_weight;</span><br><span class="line">        return vec2( t, id1 );  </span><br><span class="line">    &#125;</span><br><span class="line">    else &#x2F;&#x2F; look down</span><br><span class="line">    &#123;</span><br><span class="line">        float h &#x3D; ( pointer - 1.0 ) * d;</span><br><span class="line">        float t &#x3D; ( h - ro_weight ) &#x2F; rd_weight;</span><br><span class="line">        return vec2( t, id2 );  </span><br><span class="line">    &#125;   </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对三个轴向都完成相交检测后，比较得到最近的$t$，完成相交检测</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">vec2 nearest(in vec2 c1,in vec2 c2,in vec2 c3)</span><br><span class="line">&#123;</span><br><span class="line">    if( c1.x &lt; c2.x )</span><br><span class="line">    &#123;</span><br><span class="line">        return c1.x&lt;c3.x? c1:c3;</span><br><span class="line">    &#125;</span><br><span class="line">    else</span><br><span class="line">    &#123;</span><br><span class="line">        return c2.x&lt;c3.x? c2:c3; </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="设置参数搭建场景"><a href="#设置参数搭建场景" class="headerlink" title="设置参数搭建场景"></a>设置参数搭建场景</h4><p>基本跟<a href="https://zcx-star.github.io/2019/01/28/Shadertoy-01/" target="_blank" rel="noopener">上一篇</a>一致，构造正确的摄像机视锥</p>
+<h4 id="计算最终颜色"><a href="#计算最终颜色" class="headerlink" title="计算最终颜色"></a>计算最终颜色</h4><p>把坐标位置换算成uv，读取贴图得到最终颜色</p>
+<h4 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h4><p><a href="http://interiormapping.oogst3d.net/" target="_blank" rel="noopener">Interior Mapping</a></p>
+
+        </div>
+        <footer class="article-footer">
+            
+
+
+
+    <a data-url="http://yoursite.com/2019/01/30/Shadertoy-02/" data-id="ckf5fm8ru000hgouxhrd4gxlm" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+        </footer>
+    </div>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "author": {
+            "@type": "Person",
+            "name": "Chenxing Zheng"
+        },
+        "headline": "Shadertoy - 02. Interior Mapping",
+        "image": "http://yoursite.com/images/Shadertoy_02_01.png",
+        "keywords": "Shader",
+        "genre": "Shader",
+        "datePublished": "2019-01-30",
+        "dateCreated": "2019-01-30",
+        "dateModified": "2020-09-16",
+        "url": "http://yoursite.com/2019/01/30/Shadertoy-02/",
+        "description": "Shadertoy地址
+
+Interior Mapping是一种伪造室内场景的实时渲染技术不需要建模，在一个平面上就可以渲染出房间的体积感
+这里是该技术开发者的博客，里面有paper及demo需要了解光线追踪的基础知识，可以看我上一篇或者Scratchapixel
+实际应用中有两种思路，一种是生成单个房间，然后在房间内划分区域另一种是将房间拆分成xyz三个方向的平面，本文实现的是这种
+
+实现思路
+"
+        "wordCount": 365
+    }
+</script>
+
+</article>
+
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+    </div>
+
+    
+    </section>
+
+
+                        </div>
+                    </section>
+                    <aside id="sidebar">
+    <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+    <div class="sidebar-top">
+        <p>follow:</p>
+        <ul class="social-links">
+            
+                
+                <li>
+                    <a class="social-tooltip" title="github" href="https://github.com/zcx-star" target="_blank" rel="noopener">
+                        <i class="icon fa fa-github"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="bullseye" href="https://www.shadertoy.com/user/zcx_star" target="_blank" rel="noopener">
+                        <i class="icon fa fa-bullseye"></i>
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2019/02/14/RTR-04/" id="article-nav-newer" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">newer</strong>
+        <p class="article-nav-title">
+        
+            RTR - 04. Transforms
+        
+        </p>
+        <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+    
+    
+        <a href="/2019/01/28/Shadertoy-01/" id="article-nav-older" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">older</strong>
+        <p class="article-nav-title">Shadertoy - 01. Ray Tracing</p>
+        <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+        </a>
+    
+</nav>
+
+    
+    <div class="widgets-container">
+        
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">tags</h3>
+        <div class="widget">
+            <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Directx11/" rel="tag">Directx11</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Real-Time-Rendering/" rel="tag">Real Time Rendering</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Shader/" rel="tag">Shader</a><span class="tag-list-count">6</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+    <div class="widget-wrap widget-float">
+        <h3 class="widget-title">tag cloud</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/Directx11/" style="font-size: 10px;">Directx11</a> <a href="/tags/Real-Time-Rendering/" style="font-size: 15px;">Real Time Rendering</a> <a href="/tags/Shader/" style="font-size: 20px;">Shader</a>
+        </div>
+    </div>
+
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">archives</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">February 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">links</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://hexo.io" target="_blank" rel="noopener">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+            
+        
+    </div>
+</aside>
+
+                </div>
+            </div>
+        </div>
+        <footer id="footer">
+    <div class="container">
+        <div class="container-inner">
+            <a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>
+            <div class="credit">
+                <h1 class="logo-wrap">
+                    <a href="/" class="logo"></a>
+                </h1>
+                <p>&copy; 2020 Chenxing Zheng</p>
+                <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a></p>
+            </div>
+            <div class="footer-plugins">
+              
+    
+
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+        
+    
+    <script>
+    var disqus_shortname = 'hexo-theme-hueman';
+    
+    
+    var disqus_url = 'http://yoursite.com/2019/01/30/Shadertoy-02/';
+    
+    (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+    </script>
+
+
+
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });
+        </script>
+        
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML.js"></script>
+
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+    </div>
+</body>
+</html>

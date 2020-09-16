@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    
+
+    
+    <title>RTR - 04. Transforms | zhchx</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+        <meta name="keywords" content="Real Time Rendering" />
+    
+    <meta name="description" content="线性变换 linear transform: rotate &#x2F; scale $ f(x) + f(y) &#x3D; f(x+y) $ $ kf(x) &#x3D; f(kx) $   仿射变换 affine transform: linear transform + move 保持平行线依旧平行，但是长度和角度不一定     OpenGL &#x2F;  DirectX$$\begin{array}{l|lll}">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RTR - 04. Transforms">
+<meta property="og:url" content="http://yoursite.com/2019/02/14/RTR-04/index.html">
+<meta property="og:site_name" content="zhchx">
+<meta property="og:description" content="线性变换 linear transform: rotate &#x2F; scale $ f(x) + f(y) &#x3D; f(x+y) $ $ kf(x) &#x3D; f(kx) $   仿射变换 affine transform: linear transform + move 保持平行线依旧平行，但是长度和角度不一定     OpenGL &#x2F;  DirectX$$\begin{array}{l|lll}">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://yoursite.com/images/RTR4_04_01.png">
+<meta property="article:published_time" content="2019-02-14T15:13:42.000Z">
+<meta property="article:modified_time" content="2020-05-14T07:10:56.000Z">
+<meta property="article:author" content="Chenxing Zheng">
+<meta property="article:tag" content="Real Time Rendering">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/images/RTR4_04_01.png">
+    
+
+    
+
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/titillium-web/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+<script src="/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+    <div id="wrap">
+        <header id="header">
+    <div id="header-outer" class="outer">
+        <div class="container">
+            <div class="container-inner">
+                <div id="header-title">
+                    <h1 class="logo-wrap">
+                        <a href="/" class="logo"></a>
+                    </h1>
+                    
+                        <h2 class="subtitle-wrap">
+                            <p class="subtitle">Tech &amp; Art</p>
+                        </h2>
+                    
+                </div>
+                <div id="header-inner" class="nav-container">
+                    <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+                    <div class="nav-container-inner">
+                        <ul id="main-nav">
+                            
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/">Home</a>
+                                </li>
+                            
+                                        <ul class="main-nav-list"><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/Directx11/">Directx11</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/Real-Time-Rendering/">Real Time Rendering</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/Shader/">Shader</a></li></ul>
+                                    
+                        </ul>
+                        <nav id="sub-nav">
+                            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+</div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+        <div class="container">
+            <div class="main-body container-inner">
+                <div class="main-body-inner">
+                    <section id="main">
+                        <div class="main-body-header">
+    <h1 class="header">
+    
+    <a class="page-title-link" href="/categories/Real-Time-Rendering/">Real Time Rendering</a>
+    </h1>
+</div>
+
+                        <div class="main-body-content">
+                            <article id="post-RTR-04" class="article article-single article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+        RTR - 04. Transforms
+        </h1>
+    
+
+            </header>
+        
+        
+            <div class="article-meta">
+                
+    <div class="article-date">
+        <a href="/2019/02/14/RTR-04/" class="article-date">
+            <time datetime="2019-02-14T15:13:42.000Z" itemprop="datePublished">2019-02-14</time>
+        </a>
+    </div>
+
+		
+
+                
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/Real-Time-Rendering/" rel="tag">Real Time Rendering</a>
+    </div>
+
+            </div>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+            <ul>
+<li>线性变换 linear transform: rotate / scale<ul>
+<li>$ f(x) + f(y) = f(x+y) $</li>
+<li>$ kf(x) = f(kx) $</li>
+</ul>
+</li>
+<li>仿射变换 affine transform: linear transform + move<ul>
+<li>保持平行线依旧平行，但是长度和角度不一定</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4 id="OpenGL-DirectX"><a href="#OpenGL-DirectX" class="headerlink" title="OpenGL /  DirectX"></a>OpenGL /  DirectX</h4><p>$$\begin{array}{l|lll}<br>        OpenGL &amp; right-handed &amp; column-major &amp; CBA \vec v \newline<br>        DirectX &amp; left-handed &amp; row-major &amp; \vec v ABC<br>\end{array}$$<br><img src="/images/RTR4_04_01.png" alt=""></p>
+<h4 id="Translation"><a href="#Translation" class="headerlink" title="Translation"></a>Translation</h4><p>OpenGL : column-major VS DirectX : row-major</p>
+<p>$$<br>\left[<br>    \begin{array}{cccc}<br>        1 &amp; 0 &amp; 0 &amp; t_x \newline<br>        0 &amp; 1 &amp; 0 &amp; t_y \newline<br>        0 &amp; 0 &amp; 1 &amp; t_z \newline<br>        0 &amp; 0 &amp; 0 &amp; 1<br>    \end{array}<br>\right]<br>*<br>\left[<br>    \begin{array}{c}<br>        x \newline<br>        y \newline<br>        z \newline<br>        1<br>    \end{array}<br>\right]<br>or<br>\left[<br>    \begin{array}{cccc}<br>        x &amp; y &amp; z &amp; 1<br>    \end{array}<br>\right]<br>*<br>\left[<br>    \begin{array}{cccc}<br>        1 &amp; 0 &amp; 0 &amp; 0 \newline<br>        0 &amp; 1 &amp; 0 &amp; 0 \newline<br>        0 &amp; 0 &amp; 1 &amp; 0 \newline<br>        t_x &amp; t_y &amp; t_z &amp; 1<br>    \end{array}<br>\right]<br>$$<br>inverse matrix 逆矩阵: $ T^{-1}(t) = T(-t)$</p>
+<h4 id="Rotation"><a href="#Rotation" class="headerlink" title="Rotation"></a>Rotation</h4><p>2 dimensions ( OpenGL ) :<br>$$\begin{bmatrix}<br>    cos\theta &amp; -sin\theta \newline<br>    sin\theta &amp; cos\theta \newline<br>\end{bmatrix}$$</p>
+<p>3 dimensions ( OpenGL ) :</p>
+<p>$$R_x(\theta) =<br>\begin{bmatrix}<br>    1 &amp; 0 &amp; 0 &amp; 0 \newline<br>    0 &amp; cos\theta &amp; -sin\theta &amp; 0 \newline<br>    0 &amp; sin\theta &amp; cos\theta &amp; 0 \newline<br>    0 &amp; 0 &amp; 0 &amp; 1<br>\end{bmatrix}$$</p>
+<p>$$R_y(\theta) =<br>\begin{bmatrix}<br>    cos\theta &amp; 0 &amp; sin\theta &amp; 0 \newline<br>    0 &amp; 1 &amp; 0 &amp; 0 \newline<br>    -sin\theta &amp; 0 &amp; cos\theta &amp; 0 \newline<br>    0 &amp; 0 &amp; 0 &amp; 1<br>\end{bmatrix}$$</p>
+<p>$$R_z(\theta) =<br>\begin{bmatrix}<br>    cos\theta &amp; -sin\theta &amp; 0 &amp; 0 \newline<br>    sin\theta &amp; cos\theta &amp; 0 &amp; 0 \newline<br>    0 &amp; 0 &amp; 1 &amp; 0 \newline<br>    0 &amp; 0 &amp; 0 &amp; 1<br>\end{bmatrix}$$</p>
+<p>逆矩阵: $ R_i^{-1}(\theta) = R_i(-\theta)$</p>
+<p>for 3x3 rotation mateix, the <strong>trace</strong> ( the sum of the diagonal elements in a matrix ) is  constant :<br>$ tr(R) = 1+2cos\theta $</p>
+<h4 id="Scaling"><a href="#Scaling" class="headerlink" title="Scaling"></a>Scaling</h4><p>$$\begin{bmatrix}<br>    S_x &amp; 0 &amp; 0 &amp; 0 \newline<br>    0 &amp; S_y &amp; 0 &amp; 0 \newline<br>    0 &amp; 0 &amp; S_z &amp; 0 \newline<br>    0 &amp; 0 &amp; 0 &amp; 1<br>\end{bmatrix}$$</p>
+<p>逆矩阵: $ S^{-1}(s) = S(\frac{1}{S_x},\frac{1}{S_y},\frac{1}{S_z}) $</p>
+<ul>
+<li>如果有两项negative = &gt; rotate $ \pi $ radians</li>
+<li>如果有一项或三项negative =&gt; reflection matrix<br>  可能导致incorrect lighting或backface culling，需要先计算行列式determinant是否$&lt;0$<br>$$<br>\begin{array}{|lll|}<br>  a_1 &amp; b1 &amp; c1 \newline<br>  a_2 &amp; b2 &amp; c2 \newline<br>  a_3 &amp; b3 &amp; c3 \newline<br>\end{array}<br>= a_1b_2c_3 + b_1c_2a_3 + c_1a_2b_3 - a_3b_2c_1 - b_3c_2a_1 - c_3a_2b_1<br>$$</li>
+</ul>
+<p><strong>TRS</strong> is the order commonly used( OpenGL ),so <strong>S</strong> is applied first</p>
+<hr>
+<p>其余等用到再看</p>
+
+        </div>
+        <footer class="article-footer">
+            
+
+
+
+    <a data-url="http://yoursite.com/2019/02/14/RTR-04/" data-id="ckf5fm8rs000bgoux42cc8u3d" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+        </footer>
+    </div>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "author": {
+            "@type": "Person",
+            "name": "Chenxing Zheng"
+        },
+        "headline": "RTR - 04. Transforms",
+        "image": "http://yoursite.com/images/RTR4_04_01.png",
+        "keywords": "Real Time Rendering",
+        "genre": "Real Time Rendering",
+        "datePublished": "2019-02-14",
+        "dateCreated": "2019-02-14",
+        "dateModified": "2020-05-14",
+        "url": "http://yoursite.com/2019/02/14/RTR-04/",
+        "description": "
+线性变换 linear transform: rotate / scale
+$ f(x) + f(y) = f(x+y) $
+$ kf(x) = f(kx) $
+
+
+仿射变换 affine transform: linear transform + move
+保持平行线依旧平行，但是长度和角度不一定
+
+
+
+
+OpenGL /  DirectX$$\begin{array}{l|lll}     "
+        "wordCount": 579
+    }
+</script>
+
+</article>
+
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript" target="_blank" rel="noopener">comments powered by Disqus.</a></noscript>
+    </div>
+
+    
+    </section>
+
+
+                        </div>
+                    </section>
+                    <aside id="sidebar">
+    <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+    <div class="sidebar-top">
+        <p>follow:</p>
+        <ul class="social-links">
+            
+                
+                <li>
+                    <a class="social-tooltip" title="github" href="https://github.com/zcx-star" target="_blank" rel="noopener">
+                        <i class="icon fa fa-github"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="bullseye" href="https://www.shadertoy.com/user/zcx_star" target="_blank" rel="noopener">
+                        <i class="icon fa fa-bullseye"></i>
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2019/04/19/Shadertoy-03/" id="article-nav-newer" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">newer</strong>
+        <p class="article-nav-title">
+        
+            Shadertoy - 03. Cubemap
+        
+        </p>
+        <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+    
+    
+        <a href="/2019/01/30/Shadertoy-02/" id="article-nav-older" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">older</strong>
+        <p class="article-nav-title">Shadertoy - 02. Interior Mapping</p>
+        <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+        </a>
+    
+</nav>
+
+    
+    <div class="widgets-container">
+        
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">tags</h3>
+        <div class="widget">
+            <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Directx11/" rel="tag">Directx11</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Real-Time-Rendering/" rel="tag">Real Time Rendering</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Shader/" rel="tag">Shader</a><span class="tag-list-count">6</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+    <div class="widget-wrap widget-float">
+        <h3 class="widget-title">tag cloud</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/Directx11/" style="font-size: 10px;">Directx11</a> <a href="/tags/Real-Time-Rendering/" style="font-size: 15px;">Real Time Rendering</a> <a href="/tags/Shader/" style="font-size: 20px;">Shader</a>
+        </div>
+    </div>
+
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">archives</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">February 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">October 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">July 2018</a><span class="archive-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">links</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://hexo.io" target="_blank" rel="noopener">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+            
+        
+    </div>
+</aside>
+
+                </div>
+            </div>
+        </div>
+        <footer id="footer">
+    <div class="container">
+        <div class="container-inner">
+            <a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>
+            <div class="credit">
+                <h1 class="logo-wrap">
+                    <a href="/" class="logo"></a>
+                </h1>
+                <p>&copy; 2020 Chenxing Zheng</p>
+                <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a></p>
+            </div>
+            <div class="footer-plugins">
+              
+    
+
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+        
+    
+    <script>
+    var disqus_shortname = 'hexo-theme-hueman';
+    
+    
+    var disqus_url = 'http://yoursite.com/2019/02/14/RTR-04/';
+    
+    (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+    </script>
+
+
+
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });
+        </script>
+        
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML.js"></script>
+
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+    </div>
+</body>
+</html>
